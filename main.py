@@ -9,7 +9,7 @@ from datetime import datetime
 github_username = "Fl0wwDev"
 user_name = "mahe"
 user_email = "mafradin@hotmail.fr"
-repository_name = "farm"  # Remplacez par le nom de votre dépôt
+repository_name = "farm"  # Nom de votre dépôt
 
 # Fonction pour exécuter une commande et gérer les erreurs
 def run_command(command, check=True, capture_output=False):
@@ -31,6 +31,7 @@ def run_command(command, check=True, capture_output=False):
 try:
     run_command(["git", "config", "--global", "user.name", user_name])
     run_command(["git", "config", "--global", "user.email", user_email])
+    run_command(["git", "config", "--global", "pull.rebase", "false"])  # Force la fusion automatique par défaut
     print("Configuration Git définie avec succès.")
 except Exception as e:
     print("Impossible de configurer Git. Vérifiez votre installation.")
@@ -110,10 +111,10 @@ for _ in range(num_commits):
 
         # Gérer les pulls avec merge automatique
         try:
-            run_command(["git", "pull", "origin", default_branch, "--allow-unrelated-histories"])
+            run_command(["git", "pull", "origin", default_branch])
         except subprocess.CalledProcessError:
             print("Conflit détecté. Tentative de résolution automatique...")
-            run_command(["git", "merge", "--strategy-option", "ours"])
+            run_command(["git", "merge", "--strategy-option", "ours"])  # Garde les modifications locales
 
         # Pousser les changements
         run_command(["git", "push", "-u", "origin", default_branch])
