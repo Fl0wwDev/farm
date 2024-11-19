@@ -9,7 +9,7 @@ from datetime import datetime
 github_username = "Fl0wwDev"
 user_name = "mahe"
 user_email = "mafradin@hotmail.fr"
-repository_name = "your-repository-name"  # Remplacez par le nom de votre dépôt
+repository_name = "farm"  # Remplacez par le nom de votre dépôt
 
 # Définir la configuration Git
 subprocess.run(["git", "config", "--global", "user.name", user_name], check=True)
@@ -27,7 +27,7 @@ def generate_salt():
     return ''.join(random.choice(characters) for _ in range(20))
 
 # Détecter la branche par défaut
-default_branch = "main"  # Hypothèse par défaut
+default_branch = "farm"  # Hypothèse par défaut
 try:
     result = subprocess.run(["git", "ls-remote", "--symref", f"https://github.com/{github_username}/{repository_name}.git", "HEAD"],
                             capture_output=True, text=True, check=True)
