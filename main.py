@@ -117,7 +117,7 @@ for _ in range(num_commits):
 
         # Gérer les pulls avec gestion des conflits
         try:
-            run_command(["git", "pull", "origin", default_branch, "--allow-unrelated-histories"])
+            run_command(["git", "pull", "origin", default_branch, "--allow-unrelated-histories", "-m", "Automatic merge from script"])
         except subprocess.CalledProcessError:
             print("Conflit détecté. Tentative de résolution automatique...")
             run_command(["git", "merge", "--strategy-option", "ours", "-m", "Merge unrelated histories - resolved with 'ours' strategy"])  # Résolution automatique avec un message
