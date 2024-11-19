@@ -48,29 +48,9 @@ time.sleep(1)
 
 os.chdir(proj_dir)
 
-# Initialisation Git si nécessaire
-if not os.path.exists(".git"):
-    run_command(["git", "init"])
-    print("Dépôt Git initialisé.")
-time.sleep(1)
 
-# Ajouter un remote si non existant
-github_repo_url = f"git@github.com:{github_username}/{repository_name}.git"
-try:
-    run_command(["git", "remote", "add", "origin", github_repo_url])
-    print("Remote ajouté avec succès.")
-except subprocess.CalledProcessError:
-    print("Remote déjà configuré.")
-time.sleep(1)
-
-# Détecter ou configurer la branche par défaut
-default_branch = "main"
-try:
-    run_command(["git", "branch", "--set-upstream-to=origin/main", default_branch])
-    print("La branche principale est configurée.")
-except subprocess.CalledProcessError:
-    print("La branche principale est déjà configurée.")
-time.sleep(1)
+run_command(["git","pull"])
+print("Pull réalisé avec succès")
 
 # Nombre aléatoire de commits pour la session
 num_commits = random.randint(3, 25)
@@ -97,7 +77,7 @@ for _ in range(num_commits):
         time.sleep(1)
 
         # Push forcé
-        run_command(["git", "push", "--force", "-u", "origin", default_branch])
+        run_command(["git", "push", "--force"])
         print(f"Commit {file_name} poussé avec succès.")
         time.sleep(random.randint(5, 10))  # Pause aléatoire entre les commits
 
