@@ -76,13 +76,6 @@ for _ in range(num_commits):
         run_command(["git", "add", file_name])
         run_command(["git", "commit", "-m", f"Add {file_name}"])
 
-        # Pull et gestion des conflits
-        try:
-            run_command(["git", "pull", "origin", default_branch, "--allow-unrelated-histories"])
-        except subprocess.CalledProcessError:
-            print("Conflit détecté. Tentative de résolution automatique...")
-            run_command(["git", "merge", "--strategy-option", "ours", "-m", "Resolve merge conflict with 'ours' strategy"])
-
         # Push
         run_command(["git", "push", "-u", "origin", default_branch])
         print(f"Commit {file_name} ajouté et poussé.")
