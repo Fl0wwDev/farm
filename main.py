@@ -64,6 +64,21 @@ try:
 except Exception:
     print("Impossible de détecter la branche par défaut. Utilisation de 'main'.")
 
+# Configurer le remote si nécessaire
+github_repo_url = f"git@github.com:{github_username}/{repository_name}.git"
+try:
+    remote_output = run_command(["git", "remote", "get-url", "origin"], capture_output=True)
+    if github_repo_url not in remote_output.stdout.strip():
+        run_command(["git", "remote", "set-url", "origin", github_repo_url])
+except subprocess.CalledProcessError:
+    run_command(["git", "remote", "add", "origin", github_repo_url])
+
+# Configurer le suivi de branche
+try:
+    run_command(["git", "branch", "--set-upstream-to=origin/main", default_branch])
+except subprocess.CalledProcessError:
+    print("Impossible de configurer la branche distante.")
+
 # Nombre aléatoire de commits pour la session
 num_commits = random.randint(3, 25)
 print(f"Nombre de commits à effectuer aujourd'hui : {num_commits}")
@@ -100,21 +115,12 @@ for _ in range(num_commits):
         run_command(["git", "add", file_path])
         run_command(["git", "commit", "-m", f"Add {file_name}"])
 
-        # Configurer le dépôt distant
-        github_repo_url = f"git@github.com:{github_username}/{repository_name}.git"
+        # Gérer les pulls avec gestion des conflits
         try:
-            remote_output = run_command(["git", "remote", "get-url", "origin"], capture_output=True)
-            if github_repo_url not in remote_output.stdout.strip():
-                run_command(["git", "remote", "set-url", "origin", github_repo_url])
-        except subprocess.CalledProcessError:
-            run_command(["git", "remote", "add", "origin", github_repo_url])
-
-        # Gérer les pulls avec merge automatique
-        try:
-            run_command(["git", "pull", "origin", default_branch])
+            run_command(["git", "pull", "origin", default_branch, "--allow-unrelated-histories"])
         except subprocess.CalledProcessError:
             print("Conflit détecté. Tentative de résolution automatique...")
-            run_command(["git", "merge", "--strategy-option", "ours"])  # Garde les modifications locales
+            run_command(["git", "merge", "--strategy-option", "ours"])  # Résolution automatique
 
         # Pousser les changements
         run_command(["git", "push", "-u", "origin", default_branch])
