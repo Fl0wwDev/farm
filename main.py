@@ -11,14 +11,36 @@ user_name = "mahe"
 user_email = "mafradin@hotmail.fr"
 repository_name = "farm"  # Remplacez par le nom de votre dépôt
 
-# Définir la configuration Git
-subprocess.run(["git", "config", "--global", "user.name", user_name], check=True)
-subprocess.run(["git", "config", "--global", "user.email", user_email], check=True)
+# Fonction pour exécuter une commande et gérer les erreurs
+def run_command(command, check=True, capture_output=False):
+    try:
+        return subprocess.run(
+            command,
+            check=check,
+            capture_output=capture_output,
+            text=True
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"Erreur : La commande '{' '.join(command)}' a échoué.")
+        print(f"Code de retour : {e.returncode}")
+        if capture_output:
+            print(f"Sortie d'erreur : {e.stderr}")
+        raise
+
+# Configuration Git
+try:
+    run_command(["git", "config", "--global", "user.name", user_name])
+    run_command(["git", "config", "--global", "user.email", user_email])
+    print("Configuration Git définie avec succès.")
+except Exception as e:
+    print("Impossible de configurer Git. Vérifiez votre installation.")
+    exit(1)
 
 # Créer un répertoire pour le projet si nécessaire
 proj_dir = os.path.join(os.getcwd(), "farm")
 if not os.path.exists(proj_dir):
     os.makedirs(proj_dir)
+    print(f"Dossier '{proj_dir}' créé.")
 os.chdir(proj_dir)
 
 # Fonction pour générer un "salt" aléatoire
@@ -29,11 +51,16 @@ def generate_salt():
 # Détecter la branche par défaut
 default_branch = "main"  # Hypothèse par défaut
 try:
-    result = subprocess.run(["git", "ls-remote", "--symref", f"https://github.com/{github_username}/{repository_name}.git", "HEAD"],
-                            capture_output=True, text=True, check=True)
+    result = run_command(
+        ["git", "ls-remote", "--symref", f"https://github.com/{github_username}/{repository_name}.git", "HEAD"],
+        capture_output=True
+    )
     if "refs/heads/main" in result.stdout:
         default_branch = "main"
-except subprocess.CalledProcessError:
+    elif "refs/heads/master" in result.stdout:
+        default_branch = "master"
+    print(f"Branche par défaut détectée : {default_branch}")
+except Exception:
     print("Impossible de détecter la branche par défaut. Utilisation de 'main'.")
 
 # Nombre aléatoire de commits pour la session
@@ -66,28 +93,35 @@ for _ in range(num_commits):
             file.write(file_content)
 
         # Initialiser Git si ce n'est pas déjà fait
-        subprocess.run(["git", "init"], check=True)
+        run_command(["git", "init"])
 
         # Ajouter et committer le fichier
-        subprocess.run(["git", "add", file_path], check=True)
-        subprocess.run(["git", "commit", "-m", f"Add {file_name}"], check=True)
+        run_command(["git", "add", file_path])
+        run_command(["git", "commit", "-m", f"Add {file_name}"])
 
         # Configurer le dépôt distant
-        github_repo_url = f"https://github.com/{github_username}/{repository_name}.git"
+        github_repo_url = f"git@github.com:{github_username}/{repository_name}.git"
         try:
-            remote_output = subprocess.run(["git", "remote", "get-url", "origin"], capture_output=True, text=True, check=True)
+            remote_output = run_command(["git", "remote", "get-url", "origin"], capture_output=True)
             if github_repo_url not in remote_output.stdout.strip():
-                subprocess.run(["git", "remote", "set-url", "origin", github_repo_url], check=True)
+                run_command(["git", "remote", "set-url", "origin", github_repo_url])
         except subprocess.CalledProcessError:
-            subprocess.run(["git", "remote", "add", "origin", github_repo_url], check=True)
+            run_command(["git", "remote", "add", "origin", github_repo_url])
+
+        # Gérer les pulls avec merge automatique
+        try:
+            run_command(["git", "pull", "origin", default_branch, "--allow-unrelated-histories"])
+        except subprocess.CalledProcessError:
+            print("Conflit détecté. Tentative de résolution automatique...")
+            run_command(["git", "merge", "--strategy-option", "ours"])
 
         # Pousser les changements
-        subprocess.run(["git", "pull", "origin", default_branch, "--allow-unrelated-histories"], check=True)
-        subprocess.run(["git", "push", "-u", "origin", default_branch], check=True)
+        run_command(["git", "push", "-u", "origin", default_branch])
 
         print(f"Commit {file_name} ajouté et poussé.")
         time.sleep(random.randint(1, 3))  # Pause entre les commits
-    except subprocess.CalledProcessError as e:
-        print(f"Erreur lors de l'exécution de Git : {e}")
+    except Exception as e:
+        print(f"Erreur lors de l'exécution d'un commit ou d'une commande Git : {e}")
+        continue
 
 print("Session de commits terminée.")
