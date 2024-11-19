@@ -48,9 +48,27 @@ time.sleep(1)
 
 os.chdir(proj_dir)
 
+# Initialisation Git si nécessaire
+if not os.path.exists(".git"):
+    run_command(["git", "init"])
+    print("Dépôt Git initialisé.")
+time.sleep(1)
 
-run_command(["git","pull"])
-print("Pull réalisé avec succès")
+# Vérifier ou basculer sur la branche 'main'
+try:
+    run_command(["git", "checkout", "-b", "main"])
+    print("Branche 'main' créée et activée.")
+except subprocess.CalledProcessError:
+    run_command(["git", "checkout", "main"])
+    print("Branche 'main' activée.")
+time.sleep(1)
+
+# Pull pour synchroniser la branche locale avec la branche distante
+try:
+    run_command(["git", "pull", "origin", "main", "--allow-unrelated-histories"])
+    print("Pull réalisé avec succès.")
+except subprocess.CalledProcessError:
+    print("Aucun pull n'a été réalisé. La branche 'main' est probablement à jour.")
 
 # Nombre aléatoire de commits pour la session
 num_commits = random.randint(3, 25)
@@ -76,8 +94,8 @@ for _ in range(num_commits):
         print(f"Commit effectué pour {file_name}.")
         time.sleep(1)
 
-        # Push forcé
-        run_command(["git", "push", "--force"])
+        # Push forcé (plus sûr avec --force-with-lease)
+        run_command(["git", "push", "--force-with-lease", "-u", "origin", "main"])
         print(f"Commit {file_name} poussé avec succès.")
         time.sleep(random.randint(5, 10))  # Pause aléatoire entre les commits
 
