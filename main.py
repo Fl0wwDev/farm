@@ -120,7 +120,7 @@ for _ in range(num_commits):
             run_command(["git", "pull", "origin", default_branch, "--allow-unrelated-histories"])
         except subprocess.CalledProcessError:
             print("Conflit détecté. Tentative de résolution automatique...")
-            run_command(["git", "merge", "--strategy-option", "ours"])  # Résolution automatique
+            run_command(["git", "merge", "--strategy-option", "ours", "-m", "Merge unrelated histories - resolved with 'ours' strategy"])  # Résolution automatique avec un message
 
         # Pousser les changements
         run_command(["git", "push", "-u", "origin", default_branch])
