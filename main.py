@@ -81,7 +81,7 @@ for _ in range(num_commits):
         print(f"Commit {file_name} ajouté et poussé.")
 
         # Pause aléatoire entre les commits
-        time.sleep(random.randint(1, 3))
+        time.sleep(5)
     except Exception as e:
         print(f"Erreur lors de l'exécution d'un commit ou d'une commande Git : {e}")
         continue
