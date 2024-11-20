@@ -12,7 +12,7 @@ def run_command(command):
         print(f"Erreur : La commande '{' '.join(command)}' a échoué avec le code {e.returncode}.")
 
 # Nombre aléatoire de commits pour la session
-num_commits = random.randint(3, 10)
+num_commits = random.randint(5, 30)
 print(f"Nombre de commits à effectuer aujourd'hui : {num_commits}")
 
 temp_files = []  # Liste pour suivre les fichiers Temp créés
